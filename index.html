@@ -27,6 +27,27 @@
     
     .header {
       margin-bottom: 32px;
+      text-align: center;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .logo {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+    }
+
+    .brand-name {
+      font-size: 16px;
+      color: #a78bfa;
+      font-weight: 500;
     }
     
     .header h1 {
@@ -437,6 +458,10 @@
 <body>
   <div class="container">
     <div class="header">
+      <div class="brand">
+        <img src="logo.png" alt="이클립스" class="logo">
+        <span class="brand-name">이클립스</span>
+      </div>
       <h1>심리전 시뮬레이터</h1>
       <p>당신의 선택 뒤에 숨겨진 원칙을 발견하세요</p>
     </div>
