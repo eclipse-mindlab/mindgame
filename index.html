@@ -450,6 +450,48 @@
       border-color: #6d28d9;
     }
 
+    .book-section {
+      margin-top: 24px;
+    }
+
+    .book-label {
+      font-size: 14px;
+      color: #71717a;
+      margin-bottom: 12px;
+      text-align: center;
+    }
+
+    .book-container {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      text-decoration: none;
+    }
+
+    .book-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .book-image {
+      width: 120px;
+      height: auto;
+      border-radius: 8px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+      transition: transform 0.2s;
+    }
+
+    .book-image:hover {
+      transform: scale(1.05);
+    }
+
+    .book-title {
+      font-size: 12px;
+      color: #a1a1aa;
+    }
+
     .hidden {
       display: none !important;
     }
@@ -542,12 +584,19 @@
             </svg>
             유튜브 채널
           </a>
-          <a href="https://litt.ly/eclipse.thinker" target="_blank" class="promo-btn book-btn">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
-              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
-            </svg>
-            책 보러가기
+        </div>
+        
+        <div class="book-section">
+          <div class="book-label">이클립스의 책</div>
+          <a href="https://litt.ly/eclipse.thinker" target="_blank" class="book-container">
+            <div class="book-item">
+              <img src="book-philosophy.png" alt="세계철학전집 - 훔친 철학 편" class="book-image">
+              <span class="book-title">훔친 철학 편</span>
+            </div>
+            <div class="book-item">
+              <img src="book-psychology.png" alt="세계철학전집 - 훔친 심리학 편" class="book-image">
+              <span class="book-title">훔친 심리학 편</span>
+            </div>
           </a>
         </div>
       </div>
