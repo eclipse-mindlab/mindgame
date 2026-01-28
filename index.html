@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>심리전 시뮬레이터</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #09090b;
+      color: #fff;
+      min-height: 100vh;
+      padding: 24px;
+      line-height: 1.6;
+    }
+    
+    .container {
+      max-width: 540px;
+      margin: 0 auto;
+    }
+    
+    .header {
+      margin-bottom: 32px;
+    }
+    
+    .header h1 {
+      font-size: 24px;
+      color: #ef4444;
+      margin-bottom: 4px;
+    }
+    
+    .header p {
+      font-size: 14px;
+      color: #71717a;
+    }
+    
+    .progress {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+    
+    .progress-bar {
+      height: 4px;
+      flex: 1;
+      border-radius: 4px;
+      background: #27272a;
+      transition: background 0.3s;
+    }
+    
+    .progress-bar.completed {
+      background: #ef4444;
+    }
+    
+    .progress-bar.current {
+      background: rgba(239, 68, 68, 0.5);
+    }
+    
+    .scenario-card {
+      background: #18181b;
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+    
+    .context {
+      font-size: 12px;
+      color: #71717a;
+      margin-bottom: 12px;
+    }
+    
+    .situation {
+      font-size: 18px;
+      line-height: 1.7;
+    }
+    
+    .choices {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    
+    .choice-btn {
+      width: 100%;
+      text-align: left;
+      padding: 16px;
+      background: #18181b;
+      border: 1px solid #27272a;
+      border-radius: 12px;
+      color: #fff;
+      font-size: 15px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .choice-btn:hover {
+      background: #27272a;
+      border-color: #3f3f46;
+    }
+    
+    .choice-btn .number {
+      color: #71717a;
+      margin-right: 8px;
+    }
+    
+    .result-section {
+      display: none;
+    }
+    
+    .result-section.show {
+      display: block;
+    }
+    
+    .selected-choice {
+      padding: 16px;
+      background: #18181b;
+      border: 2px solid #3f3f46;
+      border-radius: 12px;
+      margin-bottom: 16px;
+    }
+    
+    .selected-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    
+    .selected-label {
+      font-size: 14px;
+      color: #71717a;
+    }
+    
+    .result-badge {
+      font-size: 12px;
+      padding: 2px 8px;
+      border-radius: 9999px;
+    }
+    
+    .result-badge.optimal {
+      background: rgba(34, 197, 94, 0.2);
+      color: #22c55e;
+    }
+    
+    .result-badge.strategic {
+      background: rgba(34, 197, 94, 0.2);
+      color: #22c55e;
+    }
+    
+    .result-badge.neutral {
+      background: rgba(234, 179, 8, 0.2);
+      color: #eab308;
+    }
+    
+    .result-badge.weak {
+      background: rgba(249, 115, 22, 0.2);
+      color: #f97316;
+    }
+    
+    .result-badge.passive {
+      background: rgba(249, 115, 22, 0.2);
+      color: #f97316;
+    }
+    
+    .result-badge.defensive {
+      background: rgba(239, 68, 68, 0.2);
+      color: #ef4444;
+    }
+    
+    .selected-text {
+      color: #d4d4d8;
+    }
+    
+    .outcome-card {
+      padding: 16px;
+      background: rgba(24, 24, 27, 0.5);
+      border-radius: 12px;
+      margin-bottom: 16px;
+    }
+    
+    .outcome-label {
+      font-size: 14px;
+      color: #71717a;
+      margin-bottom: 8px;
+    }
+    
+    .outcome-text {
+      color: #d4d4d8;
+    }
+    
+    .principle-card {
+      padding: 20px;
+      background: linear-gradient(135deg, rgba(127, 29, 29, 0.3), #18181b);
+      border: 1px solid rgba(127, 29, 29, 0.3);
+      border-radius: 12px;
+      margin-bottom: 16px;
+    }
+    
+    .principle-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    
+    .principle-dot {
+      width: 8px;
+      height: 8px;
+      background: #ef4444;
+      border-radius: 50%;
+    }
+    
+    .principle-name {
+      color: #f87171;
+      font-weight: 600;
+    }
+    
+    .principle-explanation {
+      color: #a1a1aa;
+      line-height: 1.7;
+    }
+    
+    .other-choices {
+      padding-top: 16px;
+      border-top: 1px solid #27272a;
+      margin-bottom: 16px;
+    }
+    
+    .other-label {
+      font-size: 14px;
+      color: #71717a;
+      margin-bottom: 12px;
+    }
+    
+    .other-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+    
+    .other-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+    
+    .other-dot.optimal, .other-dot.strategic {
+      background: #22c55e;
+    }
+    
+    .other-dot.neutral {
+      background: #eab308;
+    }
+    
+    .other-dot.weak, .other-dot.passive {
+      background: #f97316;
+    }
+    
+    .other-dot.defensive {
+      background: #ef4444;
+    }
+    
+    .other-principle {
+      color: #71717a;
+    }
+    
+    .next-btn {
+      width: 100%;
+      padding: 16px;
+      background: #dc2626;
+      border: none;
+      border-radius: 12px;
+      color: #fff;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    
+    .next-btn:hover {
+      background: #b91c1c;
+    }
+    
+    .final-screen {
+      display: none;
+      text-align: center;
+      padding: 40px 20px;
+    }
+    
+    .final-screen.show {
+      display: block;
+    }
+    
+    .final-score {
+      font-size: 48px;
+      font-weight: bold;
+      color: #ef4444;
+      margin-bottom: 8px;
+    }
+    
+    .final-label {
+      font-size: 18px;
+      color: #71717a;
+      margin-bottom: 24px;
+    }
+    
+    .final-message {
+      font-size: 16px;
+      color: #a1a1aa;
+      margin-bottom: 32px;
+      line-height: 1.7;
+    }
+    
+    .share-section {
+      margin-bottom: 24px;
+    }
+    
+    .share-label {
+      font-size: 14px;
+      color: #71717a;
+      margin-bottom: 12px;
+    }
+    
+    .share-buttons {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    
+    .share-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 12px 16px;
+      background: #27272a;
+      border: 1px solid #3f3f46;
+      border-radius: 8px;
+      color: #fff;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .share-btn:hover {
+      background: #3f3f46;
+    }
+    
+    .share-btn.twitter-btn {
+      background: #000;
+      border-color: #333;
+    }
+    
+    .share-btn.twitter-btn:hover {
+      background: #1a1a1a;
+    }
+    
+    .share-btn.success {
+      background: #166534;
+      border-color: #22c55e;
+    }
+    
+    .restart-btn {
+      width: 100%;
+      padding: 16px;
+      background: #dc2626;
+      border: none;
+      border-radius: 12px;
+      color: #fff;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    
+    .restart-btn:hover {
+      background: #b91c1c;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>심리전 시뮬레이터</h1>
+      <p>당신의 선택 뒤에 숨겨진 원칙을 발견하세요</p>
+    </div>
+    
+    <div class="progress" id="progress"></div>
+    
+    <div id="game-screen">
+      <div class="scenario-card">
+        <div class="context" id="context"></div>
+        <div class="situation" id="situation"></div>
+      </div>
+      
+      <div class="choices" id="choices"></div>
+      
+      <div class="result-section" id="result-section">
+        <div class="selected-choice">
+          <div class="selected-header">
+            <span class="selected-label">선택한 답변</span>
+            <span class="result-badge" id="result-badge"></span>
+          </div>
+          <div class="selected-text" id="selected-text"></div>
+        </div>
+        
+        <div class="outcome-card">
+          <div class="outcome-label">결과</div>
+          <div class="outcome-text" id="outcome-text"></div>
+        </div>
+        
+        <div class="principle-card">
+          <div class="principle-header">
+            <div class="principle-dot"></div>
+            <span class="principle-name" id="principle-name"></span>
+          </div>
+          <div class="principle-explanation" id="principle-explanation"></div>
+        </div>
+        
+        <div class="other-choices">
+          <div class="other-label">다른 선택지의 원칙</div>
+          <div id="other-principles"></div>
+        </div>
+        
+        <button class="next-btn" id="next-btn">다음 상황</button>
+      </div>
+    </div>
+    
+    <div class="final-screen" id="final-screen">
+      <div class="final-score" id="final-score">0/6</div>
+      <div class="final-label">당신의 심리전 점수</div>
+      <div class="final-message" id="final-message"></div>
+      <div class="share-section">
+        <div class="share-label">친구에게 공유하기</div>
+        <div class="share-buttons">
+          <button class="share-btn" id="native-share-btn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
+              <polyline points="16 6 12 2 8 6"/>
+              <line x1="12" y1="2" x2="12" y2="15"/>
+            </svg>
+            공유하기
+          </button>
+          <button class="share-btn" id="copy-btn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+            </svg>
+            링크 복사
+          </button>
+          <button class="share-btn twitter-btn" id="twitter-btn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+            </svg>
+            X 공유
+          </button>
+        </div>
+      </div>
+      <button class="restart-btn" id="restart-btn">다시 도전하기</button>
+    </div>
+  </div>
+
+  <script>
+    const scenarios = [
+      {
+        id: 1,
+        situation: "회사 동료가 네 아이디어를 자기 것처럼 발표했다. 회의 끝나고 둘만 남았을 때, 뭐라고 할까?",
+        context: "상황: 팀 회의 직후, 회의실",
+        choices: [
+          {
+            text: "\"야 그거 내 아이디어잖아. 왜 그래?\"",
+            result: "defensive",
+            resultLabel: "방어 유발",
+            outcome: "동료가 방어적으로 나오며 \"그냥 비슷하게 생각한 거지\" 라고 발뺌한다.",
+            principle: "직접 대립",
+            explanation: "정면 공격은 상대를 방어 모드로 만든다. 진실을 인정받기 어려워진다.",
+            score: 0
+          },
+          {
+            text: "\"아까 발표 잘 들었어. 근데 저번에 내가 말한 거랑 비슷하더라?\"",
+            result: "neutral",
+            resultLabel: "중립",
+            outcome: "동료가 잠시 멈칫하며 \"어... 그랬나?\" 하고 어색해한다.",
+            principle: "질문형 압박",
+            explanation: "단정 대신 질문으로 상대가 스스로 인정하게 만든다. 도망갈 구멍을 막는 기술.",
+            score: 1
+          },
+          {
+            text: "\"발표 괜찮았어. 다음엔 같이 준비해볼까? 내가 좀 더 보탤 게 있어서\"",
+            result: "strategic",
+            resultLabel: "전략적 선택",
+            outcome: "동료가 당황하며 고마워한다. 이후 회의에서 네 이름을 먼저 언급하기 시작한다.",
+            principle: "전략적 관용",
+            explanation: "빚을 지게 만들면 이후 행동을 통제할 수 있다. 복수보다 영향력이 남는 선택.",
+            score: 2
+          }
+        ]
+      },
+      {
+        id: 2,
+        situation: "친구가 빌린 돈 30만원을 3개월째 안 갚고 있다. 오늘 또 \"다음 달에 줄게\"라고 한다.",
+        context: "상황: 카페에서 대화 중",
+        choices: [
+          {
+            text: "\"알겠어, 다음 달에 꼭 줘\"",
+            result: "passive",
+            resultLabel: "수동적 선택",
+            outcome: "다음 달에도 같은 말을 듣는다. 관계는 유지되지만 돈은 돌아오지 않는다.",
+            principle: "무한 양보",
+            explanation: "데드라인 없는 약속은 약속이 아니다. 상대는 '또 넘어가네'를 학습한다.",
+            score: 0
+          },
+          {
+            text: "\"다음 달 며칠? 캘린더에 적어둘게\"",
+            result: "strategic",
+            resultLabel: "전략적 선택",
+            outcome: "친구가 \"어... 15일?\" 하고 구체적 날짜를 말한다. 그 날 실제로 입금된다.",
+            principle: "구체화 압박",
+            explanation: "모호함을 구체적 약속으로 바꾸면 심리적 구속력이 생긴다. 기록은 증거가 된다.",
+            score: 2
+          },
+          {
+            text: "\"나도 좀 급해서 그래. 이번 주 금요일까지만 10만원이라도 가능해?\"",
+            result: "optimal",
+            resultLabel: "최적의 수",
+            outcome: "친구가 미안해하며 금요일에 10만원을 보낸다. 이후 나머지도 나눠서 갚는다.",
+            principle: "작은 요청 + 이유 제시",
+            explanation: "'왜냐하면' 뒤에 이유가 붙으면 승낙률이 올라간다. 작은 단위로 쪼개면 심리적 저항이 낮아진다.",
+            score: 2
+          }
+        ]
+      },
+      {
+        id: 3,
+        situation: "마음에 드는 사람이 있다. 카톡은 하는데 만남으로 이어지질 않는다. 오늘 대화가 좀 잘 풀렸다.",
+        context: "상황: 카톡 대화 중, 분위기 좋음",
+        choices: [
+          {
+            text: "\"우리 언제 밥 한번 먹자!\"",
+            result: "weak",
+            resultLabel: "약한 수",
+            outcome: "\"ㅋㅋ 그러자~\" 라는 답이 온다. 그리고 아무 일도 일어나지 않는다.",
+            principle: "열린 제안",
+            explanation: "'언제'는 '아무 때나'가 되고, '아무 때나'는 '절대 안'이 된다.",
+            score: 0
+          },
+          {
+            text: "\"이번 주 토요일 저녁에 시간 돼? 가보고 싶은 데가 있어서\"",
+            result: "optimal",
+            resultLabel: "최적의 수",
+            outcome: "\"토요일? 잠깐만\" 하고 일정을 확인한다. 구체적인 대화가 시작된다.",
+            principle: "구체적 제안 + 이유",
+            explanation: "Yes/No로 답할 수 있는 질문이 결정을 이끈다. '가보고 싶은 데'는 호기심을 자극한다.",
+            score: 2
+          },
+          {
+            text: "\"요즘 뭐 먹고 싶은 거 있어?\"",
+            result: "neutral",
+            resultLabel: "중립",
+            outcome: "\"음... 딱히?\" 또는 음식 얘기로 빠진다. 만남 얘기는 흐지부지된다.",
+            principle: "간접 탐색",
+            explanation: "의도가 숨겨진 질문은 원하는 답을 못 얻는다. 상대도 에너지를 쓰기 싫어한다.",
+            score: 1
+          }
+        ]
+      }
+    ];
+
+    const finalMessages = {
+      low: "아직 감이 덜 잡혔어요. 하지만 걱정 마세요 — 심리전은 타고나는 게 아니라 배우는 겁니다. 다시 한번 해보면서 패턴을 익혀보세요.",
+      mid: "꽤 괜찮은 감각이에요! 몇 가지 상황에서 더 전략적인 선택이 가능했지만, 기본적인 심리 원칙은 이해하고 있네요.",
+      high: "대단해요. 당신은 이미 사람의 마음을 읽는 법을 알고 있군요. 이 감각을 실전에서도 써보세요."
+    };
+
+    let currentScenario = 0;
+    let selectedChoice = null;
+    let scores = [];
+
+    function init() {
+      renderProgress();
+      renderScenario();
+      document.getElementById('next-btn').addEventListener('click', nextScenario);
+      document.getElementById('restart-btn').addEventListener('click', restart);
+      document.getElementById('native-share-btn').addEventListener('click', nativeShare);
+      document.getElementById('copy-btn').addEventListener('click', copyLink);
+      document.getElementById('twitter-btn').addEventListener('click', shareTwitter);
+    }
+
+    function renderProgress() {
+      const progressEl = document.getElementById('progress');
+      progressEl.innerHTML = scenarios.map((_, idx) => {
+        let className = 'progress-bar';
+        if (idx < currentScenario) className += ' completed';
+        else if (idx === currentScenario) className += ' current';
+        return `<div class="${className}"></div>`;
+      }).join('');
+    }
+
+    function renderScenario() {
+      const scenario = scenarios[currentScenario];
+      document.getElementById('context').textContent = scenario.context;
+      document.getElementById('situation').textContent = scenario.situation;
+      
+      const choicesEl = document.getElementById('choices');
+      choicesEl.innerHTML = scenario.choices.map((choice, idx) => `
+        <button class="choice-btn" data-index="${idx}">
+          <span class="number">${idx + 1}.</span>${choice.text}
+        </button>
+      `).join('');
+      
+      choicesEl.querySelectorAll('.choice-btn').forEach(btn => {
+        btn.addEventListener('click', () => handleChoice(parseInt(btn.dataset.index)));
+      });
+      
+      document.getElementById('choices').classList.remove('hidden');
+      document.getElementById('result-section').classList.remove('show');
+    }
+
+    function handleChoice(index) {
+      selectedChoice = index;
+      const scenario = scenarios[currentScenario];
+      const choice = scenario.choices[index];
+      
+      scores.push(choice.score);
+      
+      // Hide choices, show result
+      document.getElementById('choices').classList.add('hidden');
+      document.getElementById('result-section').classList.add('show');
+      
+      // Fill result content
+      const badge = document.getElementById('result-badge');
+      badge.textContent = choice.resultLabel;
+      badge.className = 'result-badge ' + choice.result;
+      
+      document.getElementById('selected-text').textContent = choice.text;
+      document.getElementById('outcome-text').textContent = choice.outcome;
+      document.getElementById('principle-name').textContent = choice.principle;
+      document.getElementById('principle-explanation').textContent = choice.explanation;
+      
+      // Other choices
+      const otherEl = document.getElementById('other-principles');
+      otherEl.innerHTML = scenario.choices
+        .filter((_, idx) => idx !== index)
+        .map(c => `
+          <div class="other-item">
+            <div class="other-dot ${c.result}"></div>
+            <span class="other-principle">${c.principle}</span>
+          </div>
+        `).join('');
+      
+      // Update button text
+      const isLast = currentScenario === scenarios.length - 1;
+      document.getElementById('next-btn').textContent = isLast ? '결과 보기' : '다음 상황';
+    }
+
+    function nextScenario() {
+      if (currentScenario < scenarios.length - 1) {
+        currentScenario++;
+        selectedChoice = null;
+        renderProgress();
+        renderScenario();
+      } else {
+        showFinalScreen();
+      }
+    }
+
+    function showFinalScreen() {
+      document.getElementById('game-screen').classList.add('hidden');
+      document.getElementById('final-screen').classList.add('show');
+      
+      const total = scores.reduce((a, b) => a + b, 0);
+      const max = scenarios.length * 2;
+      
+      document.getElementById('final-score').textContent = `${total}/${max}`;
+      
+      let message;
+      if (total <= 2) message = finalMessages.low;
+      else if (total <= 4) message = finalMessages.mid;
+      else message = finalMessages.high;
+      
+      document.getElementById('final-message').textContent = message;
+    }
+
+    function getShareText() {
+      const total = scores.reduce((a, b) => a + b, 0);
+      const max = scenarios.length * 2;
+      return `🎯 심리전 시뮬레이터 결과: ${total}/${max}점\n\n당신의 심리전 감각을 테스트해보세요!`;
+    }
+
+    function nativeShare() {
+      const total = scores.reduce((a, b) => a + b, 0);
+      const max = scenarios.length * 2;
+      
+      if (navigator.share) {
+        navigator.share({
+          title: '심리전 시뮬레이터',
+          text: `🎯 나의 심리전 점수: ${total}/${max}점\n당신의 심리전 감각을 테스트해보세요!`,
+          url: window.location.href
+        }).catch(() => {});
+      } else {
+        copyLink();
+      }
+    }
+
+    function copyLink() {
+      const text = getShareText() + '\n' + window.location.href;
+      const btn = document.getElementById('copy-btn');
+      
+      navigator.clipboard.writeText(text).then(() => {
+        btn.classList.add('success');
+        btn.innerHTML = `
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+          복사 완료!
+        `;
+        setTimeout(() => {
+          btn.classList.remove('success');
+          btn.innerHTML = `
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+            </svg>
+            링크 복사
+          `;
+        }, 2000);
+      });
+    }
+
+    function shareTwitter() {
+      const total = scores.reduce((a, b) => a + b, 0);
+      const max = scenarios.length * 2;
+      const text = encodeURIComponent(`🎯 심리전 시뮬레이터 결과: ${total}/${max}점\n\n당신의 심리전 감각을 테스트해보세요!`);
+      const url = encodeURIComponent(window.location.href);
+      window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank');
+    }
+
+    function restart() {
+      currentScenario = 0;
+      selectedChoice = null;
+      scores = [];
+      
+      document.getElementById('final-screen').classList.remove('show');
+      document.getElementById('game-screen').classList.remove('hidden');
+      
+      renderProgress();
+      renderScenario();
+    }
+
+    init();
+  </script>
+</body>
+</html>
